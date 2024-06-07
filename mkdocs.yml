@@ -1,0 +1,20 @@
+site_name: My Docs
+repo_url: https://github.com/bobo522487/wiki.git
+
+theme:
+  name: 'material'
+
+# nav:
+#   - 首页: index.md
+#   - 技术文档:
+#       - 01技术文档: 01.技术文档.md
+
+plugins:
+  - search
+  - awesome-pages:
+      filename: .index
+      collapse_single_pages: true
+      strict: false
+      order: asc
+      sort_type: natural
+      order_by: title

@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<robot name="mecanumbot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- 定义常用的属性 -->
+    <xacro:property name="joint_xyz_x" value="0.08" />
+    <xacro:property name="joint_xyz_y" value="0.0845" />
+    <xacro:property name="joint_xyz_z" value="-0.0389" />
+    <xacro:property name="joint_rpy_r" value="1.57" />
+    <xacro:property name="joint_rpy_p" value="0" />
+    <xacro:property name="joint_rpy_y" value="3.14159" />
+
+    <!-- 定义颜色材料 -->
+    <material name="Green">
+        <color rgba="0 0.7 0 1" />
+    </material>
+    <material name="White">
+        <color rgba="0.7 0.7 0.7 1" />
+    </material>
+
+    <!-- 定义基本脚印 -->
+    <link name="base_footprint" />
+    
+    <!-- 基本链接 -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://mecanumbot_description/meshes/base_link.STL" />
+            </geometry>
+            <material name="Green" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://mecanumbot_description/meshes/base_link.STL" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.00498197982182523 5.70233829969297E-05 -0.0121008098068578" rpy="0 0 0" />
+            <mass value="0.486218814966626" />
+            <inertia ixx="0.00196277727666921" ixy="2.50447049446755E-07" ixz="0.000140534767811098" iyy="0.00457256033711368" iyz="2.68618064993882E-07" izz="0.00493927269870476" />
+        </inertial>
+    </link>
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="0.0 0.0 0.0815" rpy="0 0 0" />
+    </joint>
+
+    <!-- 定义麦克纳姆轮的宏 -->
+    <xacro:macro name="wheel" params="name xyz rpy">
+        <link name="${name}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://mecanumbot_description/meshes/${name}.STL" />
+                </geometry>
+                <material name="White" />
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://mecanumbot_description/meshes/${name}.STL" />
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="2.3728E-06 -9.4228E-07 0.00064068" rpy="0 0 0" />
+                <mass value="0.051543" />
+                <inertia ixx="1.4597E-05" ixy="-4.7945E-10" ixz="-2.4786E-10" iyy="1.4598E-05" iyz="1.7972E-09" izz="2.4267E-05" />
+            </inertial>
+        </link>
+        <joint name="${name}_joint" type="continuous">
+            <parent link="base_link" />
+            <child link="${name}" />
+            <origin xyz="${xyz}" rpy="${rpy}" />
+            <axis xyz="0 0 1" rpy="0 0 0"/>
+            <limit effort="100" velocity="1" />
+        </joint>
+    </xacro:macro>
+
+    <!-- 实例化麦克纳姆轮 -->
+    <xacro:wheel name="front_left_wheel" xyz="${joint_xyz_x} -${joint_xyz_y} ${joint_xyz_z}" rpy="${joint_rpy_r} ${joint_rpy_p} 0" />
+    <xacro:wheel name="front_right_wheel" xyz="${joint_xyz_x} ${joint_xyz_y} ${joint_xyz_z}" rpy="-${joint_rpy_r} ${joint_rpy_p} ${joint_rpy_y}" />
+    <xacro:wheel name="rear_left_wheel" xyz="-${joint_xyz_x} -${joint_xyz_y} ${joint_xyz_z}" rpy="${joint_rpy_r} ${joint_rpy_p} 0" />
+    <xacro:wheel name="rear_right_wheel" xyz="-${joint_xyz_x} ${joint_xyz_y} ${joint_xyz_z}" rpy="-${joint_rpy_r} ${joint_rpy_p} ${joint_rpy_y}" />
+
+    <!-- ROS 2 控制配置 -->
+    <ros2_control name="mecanumbot" type="system">
+        <hardware>
+            <plugin>mecanumbot_hardware/MecanumbotHardware</plugin>
+            <param name="serial_port">/dev/ttyACM0</param>
+        </hardware>
+        <joint name="front_left_wheel_joint">
+            <command_interface name="velocity" />
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+            <param name="motor_id">1</param>
+        </joint>
+        <joint name="front_right_wheel_joint">
+            <command_interface name="velocity" />
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+            <param name="motor_id">2</param>
+        </joint>
+        <joint name="rear_left_wheel_joint">
+            <command_interface name="velocity" />
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+            <param name="motor_id">4</param>
+        </joint>
+        <joint name="rear_right_wheel_joint">
+            <command_interface name="velocity" />
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+            <param name="motor_id">8</param>
+        </joint>
+    </ros2_control>
+</robot>
